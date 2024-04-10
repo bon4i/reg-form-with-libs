@@ -1,0 +1,14 @@
+.register-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 15px;
+    margin-bottom: 3px;
+}
+
+.input {
+    height: 25px;
+    margin-bottom: 20px;
+}
