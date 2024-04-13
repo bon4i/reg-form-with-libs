@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import styles from './App.module.css';
-import { InputField } from './components/InputField/InputField';
 
 const fieldsScheme = yup.object()
 	.shape({
@@ -23,11 +22,11 @@ const fieldsScheme = yup.object()
 	});
 
 export const App = () => {
+	const submitButtonRef = useRef(null);
 	const {
 		register,
 		handleSubmit,
-		reset,
-		formState: {errors},
+		formState: {errors, isValid},
 	} = useForm({
 		defaultValues: {
 			email: '',
@@ -40,25 +39,25 @@ export const App = () => {
 
 	const checkError = (errors) => {
 		let errorMessage = null;
-		switch (errorMessage) {
-			case errors.email:
-				errorMessage = errors.email?.message;
-			break;
-			case errors.password:
-				errorMessage = errors.password?.message;
-			break;
-			case errors.confirmedPassword:
-				errorMessage = errors.confirmedPassword?.message;
-			break;
-			default:
-			break;
-		};
+		if (errors.email) {
+			errorMessage = errors.email?.message;
+		} else if (errors.password) {
+			errorMessage = errors.password?.message;
+		} else if (errors.confirmedPassword) {
+			errorMessage = errors.confirmedPassword?.message;
+		}
+		return errorMessage;
 	}
 
 	const submitForm = (formData) => {
 		console.log(formData);
-		reset();
 	}
+
+	useEffect(() => {
+		if (isValid) {
+			submitButtonRef.current.focus();
+		}
+	  });
 
 	return (
 		<div className={styles.app}>
@@ -66,29 +65,41 @@ export const App = () => {
 				<p className={styles.title}>Регистрация</p>
 			</div>
 			<form className={styles.form} onSubmit={handleSubmit(submitForm)}>
-				<InputField
-					label={'Почта'}
-					type={'text'}
-					name={'email'}
-					placeholder='Введите адрес ящика в формате @example.ru'
-					{...register('email')}
-				/>
-				<InputField
-					label={'Пароль'}
-					type={'password'}
-					name={'password'}
-					placeholder='Введите пароль'
-					{...register('password')}
-				/>
-				<InputField
-					label={'Повторите пароль'}
-					type={'password'}
-					name={'confirmedPassword'}
-					placeholder='Повторите пароль'
-					{...register('confirmedPassword')}
-				/>
+				<div className={styles['register-form']}>
+					<label htmlFor='email' className={styles.label}>Почта</label>
+					<input
+						className={styles.input}
+						id='email'
+						type='email'
+						placeholder='Введите адрес ящика в формате @example.ru'
+						autoComplete="off"
+						{...register('email')}
+					/>
+				</div>
+				<div className={styles['register-form']}>
+					<label htmlFor='password' className={styles.label}>Пароль</label>
+					<input
+						className={styles.input}
+						id='password'
+						type='password'
+						placeholder='Введите пароль'
+						autoComplete="off"
+						{...register('password')}
+					/>
+				</div>
+				<div className={styles['register-form']}>
+					<label htmlFor='confirmedPassword' className={styles.label}>Повторите пароль</label>
+					<input
+						className={styles.input}
+						id='confirmedPassword'
+						type='password'
+						placeholder='Повторите пароль'
+						{...register('confirmedPassword')}
+						autoComplete="off"
+					/>
+				</div>
 				<div className={styles.error}>{checkError(errors)}</div>
-				<button type='submit'>
+				<button type='submit' disabled={!isValid} ref={submitButtonRef}>
 					Зарегистроваться
 				</button>
 			</form>
